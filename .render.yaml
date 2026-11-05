@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: fraud-detection-api
+    runtime: docker
+    region: ohio
+    plan: standard
+    
+    # Build configuration
+    dockerfilePath: ./Dockerfile.render
+    dockerContext: ./
+    
+    # Readiness verifies MongoDB connectivity before Render routes traffic.
+    healthCheckPath: /health/ready
+    
+    # Environment variables (override in dashboard)
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: MONGODB_DATABASE
+        value: fraud_detection_db
+      # Set to the exact Vercel production origin after that hostname exists.
+      - key: CORS_ORIGINS
+        sync: false
+      - key: SECRET_KEY
+        sync: false
+      - key: MODEL_STORAGE_BACKEND
+        value: atlas
+      - key: MODEL_ARTIFACT_SIGNING_KEY
+        sync: false
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: "false"
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: PYTHONDONTWRITEBYTECODE
+        value: "1"
+    
+    # Auto-deploy configuration
+    autoDeployTrigger: commit
